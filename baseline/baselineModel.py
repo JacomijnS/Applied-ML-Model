@@ -57,8 +57,30 @@ class SlidingWindowCNN(nn.Module):
         x = self.fc1(x)            # Apply fully connected layer
         return x
 
-# Now we need to make a mechanism that separates the image into patches
 
+# Calculate Intersection of union, this function is taken from the following guide:
+# https://www.v7labs.com/blog/intersection-over-union-guide
+def compute_iou(box1, box2):
+    # Calculate intersection area
+    intersection_width = min(box1.right, box2.right) - max(box1.left, box2.left)
+    intersection_height = min(box1.bottom, box2.bottom) - max(box1.top, box2.top)
+    
+    if intersection_width <= 0 or intersection_height <= 0:
+        return 0
+    
+    intersection_area = intersection_width * intersection_height
+
+    # Calculate union area
+    box1_area = (box1.right - box1.left) * (box1.bottom - box1.top)
+    box2_area = (box2.right - box2.left) * (box2.bottom - box2.top)
+    
+    union_area = box1_area + box2_area - intersection_area
+
+    # Calculate IoU
+    iou = intersection_area / union_area
+    return iou
+
+# Now we need to make a mechanism that separates the image into patches
 # Generate patches for each
 def generate_patches(img, window_size=64, stride=32):
     patches = []
@@ -73,19 +95,43 @@ def generate_patches(img, window_size=64, stride=32):
 
 
 class PatchDataset():
-    def __init__(self, image_direction, window_size=64, stride=32): # Window is 64x64
+    def __init__(self, image_directory, label_directory, window_size=64, stride=32): # Window is 64x64
         self.image_paths = [
-            os.path.join(image_direction, f) for f in os.listdir(image_direction).endswith('.jpg')
+            os.path.join(image_directory, f) for f in os.listdir(image_directory).endswith('.jpg')
             ] # Sanity check for images
         self.window_size = window_size
         self.stride = stride
         self.samples = []
 
         for path in self.image_paths:
+            # Get filename and get the correct label
+            filename = os.path.basename(path)
+            label_path = os.path.join(label_directory, filename.replace('.jpg', '.txt'))
+
             img = cv2.imread(path, cv2.IMREAD_GRAYSCALE).astype("float32") / 255.0
             patches, coords = generate_patches(img, window_size, stride)
-            for p in patches:
-                self.samples.append(p)
+            
+            boxes = [] # Save boxes at quadruple
+            if os.path.exists(label_path):
+                with open(label_path, 'r') as f:
+                    data = list(map(float, f.read().split()[1:0])) # Skip first class since we are not classifying
+                    for i in range(0, len(data), 4):
+                        cx, cy, w, h = data[i:i + 4]
+                        x1 = int((cx - w / 2) * img.shape[1])
+                        y1 = int((cy - h / 2) * img.shape[0])
+                        x2 = int((cx + w / 2) * img.shape[1])
+                        y2 = int((cy + h / 2) * img.shape[0])
+                        boxes.append((x1, y1, x2, y2))
+
+
+            for p in range(0, len(patches) - 1):
+                label = 0
+                for box in boxes:
+                    if compute_iou(box, coords[p]) > 0.2: # if more than half is 
+                        label = 1
+                        break
+                self.samples.append((patches[p], label)) # store patch with label as a double
+
 
     def __len__(self):
         return len(self.samples)
