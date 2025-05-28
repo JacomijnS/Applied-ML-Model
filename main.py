@@ -1,4 +1,4 @@
-from project_name.models.yoloModel import YOLOModel, plot_preds_vs_truth
+from project_name.models.yoloModel import YOLOModel
 
 TRAIN = False
 PREDICT = True
@@ -10,7 +10,8 @@ testPath = (
     "project_name/dataSubset/test/images"
 )
 testLabelPath = (
-    "project_name/dataSubset/test/labels/distal-humerus-fracture-1_jpg.rf.831cb137cfcbde1079f86abd5f5f2867.txt"
+    "project_name/dataSubset/test/labels/"
+    "distal-humerus-fracture-1_jpg.rf.831cb137cfcbde1079f86abd5f5f2867.txt"
 )
 
 # Instantiate your model class
@@ -35,8 +36,3 @@ if PREDICT is True:
     )
     for r in results:
         r.show()  # Show the results in a window
-
-if PRINT is True:
-    print("Printing results...")
-    # Print result summary
-    plot_preds_vs_truth(testPath, results, testLabelPath)
