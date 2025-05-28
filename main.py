@@ -1,8 +1,42 @@
-# This is a sample Python script.
+from project_name.models.yoloModel import YOLOModel, plot_preds_vs_truth
 
-def hello_world():
-    return "Hello, World!"
+TRAIN = False
+PREDICT = True
+PRINT = False
+# Subset for testing purposes
+subsetPath = "project_name/dataSubset/dataSubset.yaml"
+# We grab one of the images from test set
+testPath = (
+    "project_name/dataSubset/test/images"
+)
+testLabelPath = (
+    "project_name/dataSubset/test/labels/distal-humerus-fracture-1_jpg.rf.831cb137cfcbde1079f86abd5f5f2867.txt"
+)
 
+# Instantiate your model class
+model = YOLOModel()
 
-if __name__ == '__main__':
-    hello_world()
+# Train it (run 1 epoch just for testing)
+if TRAIN is True:
+    # Train the model on the subset of data
+    print("Training the model on the subset of data...")
+    model.train(pathToData=subsetPath, epochs=1)
+
+if PREDICT is True:
+    print("Predicting on an example image...")
+
+    # Load the trained model
+    model.load_model("runs/obb/train2/weights/best.pt")
+    print("Model loaded successfully.")
+    # Predict on an example image (adjust path if needed)
+    results = model.predict(
+        source=testPath,
+        save=False
+    )
+    for r in results:
+        r.show()  # Show the results in a window
+
+if PRINT is True:
+    print("Printing results...")
+    # Print result summary
+    plot_preds_vs_truth(testPath, results, testLabelPath)
