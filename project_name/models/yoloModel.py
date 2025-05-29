@@ -23,7 +23,12 @@ class YOLOModel(YOLO):
             data=pathToData,
             epochs=epochs,
             batch=batch,
-            obb=True  # Enable Oriented Bounding Boxes
+            obb=True,  # Enable Oriented Bounding Boxes
+            # Data augmentation parameters
+            degrees = 180, # We can rotate the images between -180 and 180 degrees because x-ray images don't have a specific orientation
+            flipud=0.5, # There is a 50% chance to flip the image upside down, because x-ray images don't have a specific orientation
+            fliplr=0.5, # There is a 50% chance to flip the image left to right, because x-ray images don't have a specific orientation
+            hsv_v=0.4, # The image intensity is randomly selected between -0.4 and 0.4 because x-ray images can have different intensities
         )
 
     def load_model(self, model_path: str):
