@@ -1,17 +1,16 @@
 from project_name.models.yoloModel import YOLOModel
 
-TRAIN = False
-PREDICT = True
+TRAIN = True
+PREDICT = False
 PRINT = False
 # Subset for testing purposes
-subsetPath = "project_name/dataSubset/dataSubset.yaml"
+subsetPath = "project_name/data/data.yaml"
 # We grab one of the images from test set
 testPath = (
-    "project_name/dataSubset/test/images"
+    "project_name/data/test/images"
 )
 testLabelPath = (
-    "project_name/dataSubset/test/labels/"
-    "distal-humerus-fracture-1_jpg.rf.831cb137cfcbde1079f86abd5f5f2867.txt"
+    "project_name/data/test/labels"
 )
 
 # Instantiate your model class
@@ -21,7 +20,7 @@ model = YOLOModel()
 if TRAIN is True:
     # Train the model on the subset of data
     print("Training the model on the subset of data...")
-    model.train(pathToData=subsetPath, epochs=1)
+    model.train(pathToData=subsetPath, epochs=50)
 
 if PREDICT is True:
     print("Predicting on an example image...")

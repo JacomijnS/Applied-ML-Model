@@ -1,7 +1,7 @@
 task: obb
 mode: train
 model: yolo11n-obb.pt
-data: project_name/dataSubset/dataSubset.yaml
+data: project_name/data/data.yaml
 epochs: 1
 time: null
 patience: 100

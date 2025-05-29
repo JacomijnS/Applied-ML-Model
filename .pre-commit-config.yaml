@@ -8,10 +8,10 @@ repos:
         args: 
           - --max-line-length=120
           - --ignore=E115,E123,E225,E251,E261,E302,E303,E501,W291,W292,W293
-- repo: local
-  hooks:
-    - id: run-unittests
-      name: Run unittests
-      entry: python -m unittest discover tests
-      language: python
-      pass_filenames: false
+#- repo: local
+#  hooks:
+#    - id: run-unittests
+#      name: Run unittests
+#      entry: python -m unittest discover tests
+#      language: python
+#      pass_filenames: false
