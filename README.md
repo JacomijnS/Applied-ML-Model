@@ -12,3 +12,5 @@ All dependencies can be installed with
 </pre>
 
 ## Running the API
+Run the server with:
+fastapi run main.py
