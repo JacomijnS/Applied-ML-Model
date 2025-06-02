@@ -1,13 +1,12 @@
 from fastapi import FastAPI, UploadFile, HTTPException
-import sys
-sys.path.append("..")
 from project_name.models.yoloModel import YOLOModel
 from PIL import Image
 import io
+import json
 
 app = FastAPI()
 model = YOLOModel()
-model.load_model("../runs/obb/train2/weights/best.pt")
+model.load_model("../runs/obb/train6/weights/best.pt")
 
 predictions = {}
 # Handle file uploads and predictions
@@ -29,10 +28,10 @@ async def predict(file: UploadFile):
             source=image,
             save=False
         )
-        # Store the results in the predictions cache
-        predictions[file.filename] = results
-        for r in results:
-            r.show()  # Show the results in a window
-        return results
+        json_str = results[0].tojson()
+        json_data = json.loads(json_str)
+        predictions[file.filename] = json_data
+        print(results)
+        return json_data
     else:
         raise HTTPException(status_code=400, detail="Invalid file format. Only .jpg files are allowed.")
