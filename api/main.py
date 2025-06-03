@@ -5,14 +5,21 @@ from project_name.models.yoloModel import YOLOModel
 from PIL import Image
 import io
 import json
+from pydantic import BaseModel
 
 app = FastAPI()
 model = YOLOModel()
 model.load_model("../runs/obb/train6/weights/best.pt")
 
+class PredictionResponse(BaseModel):
+    filename: str
+    name: str
+    confidence: float
+    bbox: list
+
 predictions = {}
 # Handle file uploads and predictions
-@app.post("/predict") #
+@app.post("/predict", description="Endpoint to upload an image and get predictions.", response_model=PredictionResponse)
 async def predict(file: UploadFile):
     # Check if the file is empty or None
     if file.filename == "" or file is None:
