@@ -23,7 +23,6 @@ class YOLOModel(YOLO):
             data=pathToData,
             epochs=epochs,
             batch=batch,
-            obb=True,  # Enable Oriented Bounding Boxes
             # Data augmentation parameters
             degrees = 180, # We can rotate the images between -180 and 180 degrees because x-ray images don't have a specific orientation
             flipud=0.5, # There is a 50% chance to flip the image upside down, because x-ray images don't have a specific orientation

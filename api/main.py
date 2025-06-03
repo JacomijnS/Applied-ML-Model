@@ -1,4 +1,6 @@
 from fastapi import FastAPI, UploadFile, HTTPException
+import sys
+sys.path.append('..')
 from project_name.models.yoloModel import YOLOModel
 from PIL import Image
 import io
