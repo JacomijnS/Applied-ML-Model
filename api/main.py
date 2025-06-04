@@ -12,12 +12,21 @@ app = FastAPI()
 model = YOLOModel()
 model.load_model("runs/obb/train6/weights/best.pt")
 
+class Bbox(BaseModel):
+    x1: float
+    y1: float
+    x2: float
+    y2: float
+    x3: float
+    y3: float
+    x4: float
+    y4: float
 
 class PredictionResponse(BaseModel):
     filename: str
     name: str
     confidence: float
-    bbox: list
+    bbox: Bbox
 
 
 predictions = {}
@@ -53,11 +62,22 @@ async def predict(file: UploadFile = File(
             source=image,
             save=False
         )
-        json_str = results[0].tojson()
+        json_str = results[0].to_json()
         json_data = json.loads(json_str)
-        predictions[file.filename] = json_data
+
+        pred = json_data[0]
+        
+        # Transform json to an object
+        response_obj = PredictionResponse(
+            filename=file.filename,
+            name=pred["name"],
+            confidence=pred["confidence"],
+            bbox=Bbox(**pred["box"])
+        )
+
+        predictions[file.filename] = response_obj
         print(results)
-        return json_data
+        return response_obj
     else:
         raise HTTPException(
             status_code=400,
