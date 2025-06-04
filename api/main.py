@@ -1,4 +1,4 @@
-from fastapi import FastAPI, UploadFile, HTTPException
+from fastapi import FastAPI, UploadFile, HTTPException, File
 from fastapi.responses import RedirectResponse
 import sys
 from project_name.models.yoloModel import YOLOModel
@@ -34,7 +34,9 @@ async def root():
     description="Endpoint to upload an image and get predictions.",
     response_model=PredictionResponse
 )
-async def predict(file: UploadFile):
+async def predict(file: UploadFile = File(
+                ...,
+                description= "Upload an image for prediction, accepted formats are .jpg, .jpeg, and .png.")):
     # Check if the file is empty or None
     if file.filename == "" or file is None:
         raise HTTPException(status_code=400, detail="No file uploaded.")
