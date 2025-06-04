@@ -1,9 +1,0 @@
-ultralytics
-torch
-tqdm
-numpy
-os
-cv2
-fastapi
-PIL
-"fastapi[standard]"

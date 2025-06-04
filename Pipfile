@@ -5,6 +5,8 @@ name = "pypi"
 
 [packages]
 ultralytics = "*"
+python-multipart = "*"
+fastapi = {extras = ["standard"], version = "*"}
 
 [dev-packages]
 

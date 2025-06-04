@@ -1,15 +1,17 @@
 from fastapi import FastAPI, UploadFile, HTTPException
+from fastapi.responses import RedirectResponse
 import sys
-sys.path.append('..')
 from project_name.models.yoloModel import YOLOModel
 from PIL import Image
 import io
 import json
 from pydantic import BaseModel
 
+sys.path.append('..')
 app = FastAPI()
 model = YOLOModel()
-model.load_model("../runs/obb/train6/weights/best.pt")
+model.load_model("runs/obb/train6/weights/best.pt")
+
 
 class PredictionResponse(BaseModel):
     filename: str
@@ -17,9 +19,21 @@ class PredictionResponse(BaseModel):
     confidence: float
     bbox: list
 
+
 predictions = {}
+
+
+@app.get("/", include_in_schema=False)
+async def root():
+    return RedirectResponse(url="/docs")
+
+
 # Handle file uploads and predictions
-@app.post("/predict", description="Endpoint to upload an image and get predictions.", response_model=PredictionResponse)
+@app.post(
+    "/predict",
+    description="Endpoint to upload an image and get predictions.",
+    response_model=PredictionResponse
+)
 async def predict(file: UploadFile):
     # Check if the file is empty or None
     if file.filename == "" or file is None:
@@ -32,7 +46,7 @@ async def predict(file: UploadFile):
     if file.filename.endswith(('.jpg', '.jpeg', '.png')):
         image_bytes = await file.read()
         image = Image.open(io.BytesIO(image_bytes)).convert("RGB")
-        
+
         results = model.predict(
             source=image,
             save=False
@@ -43,4 +57,7 @@ async def predict(file: UploadFile):
         print(results)
         return json_data
     else:
-        raise HTTPException(status_code=400, detail="Invalid file format. Only .jpg files are allowed.")
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid file format. Only .jpg files are allowed."
+        )
