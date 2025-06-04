@@ -26,7 +26,7 @@ class PredictionResponse(BaseModel):
     filename: str
     name: str
     confidence: float
-    bbox: Bbox
+    bbox: Bbox | None
 
 
 predictions = {}
@@ -64,6 +64,17 @@ async def predict(file: UploadFile = File(
         )
         json_str = results[0].to_json()
         json_data = json.loads(json_str)
+
+        # if no fracture was found
+        if not json_data: 
+            response_obj = PredictionResponse(
+                filename=file.filename,
+                name="no fracture",
+                confidence=0.0,
+                bbox=None
+            )
+            predictions[file.filename] = response_obj
+            return response_obj
 
         pred = json_data[0]
         
