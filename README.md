@@ -60,3 +60,24 @@ To start training run:
 ```bash
 python main.py
 ```
+
+## Run the frontend
+
+The frontend uses Quasar, which is a Vue framework. You need to do the following to run it:
+
+```bash
+npm install @quasar/app-dev
+```
+
+Then go into the repository and install the dependencies:
+
+```bash
+cd frontend
+npm install
+```
+
+Now you are ready to run the frontend:
+
+```bash
+quasar dev
+```

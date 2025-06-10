@@ -1,5 +1,6 @@
 from fastapi import FastAPI, UploadFile, HTTPException, File
 from fastapi.responses import RedirectResponse
+from fastapi.middleware.cors import CORSMiddleware
 import sys
 from project_name.models.yoloModel import YOLOModel
 from PIL import Image
@@ -7,8 +8,19 @@ import io
 import json
 from pydantic import BaseModel
 
+
 sys.path.append('..')
 app = FastAPI()
+
+# Allow for CORS 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 model = YOLOModel()
 model.load_model("runs/obb/train6/weights/best.pt")
 
