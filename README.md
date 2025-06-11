@@ -63,10 +63,11 @@ python main.py
 
 ## Run the frontend
 
-The frontend uses Quasar, which is a Vue framework. You need to do the following to run it:
+The frontend uses Quasar, which is a Vue framework. You need to first run the API as described above. After that you open another terminal to the site.
+You need to do the following to run frontend:
 
 ```bash
-npm install @quasar/app-dev
+npm install -g @quasar/cli
 ```
 
 Then go into the repository and install the dependencies:
