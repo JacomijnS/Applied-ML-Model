@@ -1,7 +1,7 @@
 from project_name.models.yoloModel import YOLOModel
 import yaml
 
-TRAIN = True
+TRAIN = False
 PREDICT = False
 VALIDATE = False
 TUNE = True
@@ -43,7 +43,7 @@ if VALIDATE is True:
     print("Validating the model on the validation set...")
 
     # Load the trained model
-    model.load_model("runs/obb/train6/weights/best.pt")
+    model.load_model("runs/obb/train8/weights/best.pt")
     results = model.val(data=dataPath, plots=True)
     print(results.confusion_matrix.to_df())
 
