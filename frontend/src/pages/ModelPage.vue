@@ -50,14 +50,14 @@
       </div>
     </div>
   </q-page>
-  <q-dialog v-model="imageDialogOpen">
-    <q-card style="width: 90vw; max-height: 100%">
+  <q-dialog v-model="imageDialogOpen" >
+    <q-card style="width: 90vw; max-height: 100%;">
       <q-card-section style="position: relative">
         <img :src="dialogImgUrl" ref="zoomImg"
           :style="`width: ${zoomImgNaturalWidth}px; height: ${zoomImgNaturalHeight}px; max-width: 100%; max-height: 80vh; display: block;`"
           @load="onZoomImgLoad" />
         <svg v-if="dialogBbox && zoomImgNaturalWidth && zoomImgNaturalHeight" :width="zoomImgNaturalWidth"
-          :height="zoomImgNaturalHeight" style="position: absolute; left: 0; top: 0; pointer-events: none">
+          :height="zoomImgNaturalHeight" style="position: absolute; left: 16px; top: 16px; pointer-events: none">
           <polygon :points="getPolygonPoints(dialogBbox)" stroke="#dc002d" stroke-width="3" fill="none" />
         </svg>
       </q-card-section>
@@ -144,3 +144,9 @@ function onZoomImgLoad(evt) {
   zoomImgNaturalHeight.value = evt.target.naturalHeight
 }
 </script>
+
+<style>
+.q-card__section--vert {
+  
+}
+</style>
