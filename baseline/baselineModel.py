@@ -37,6 +37,12 @@ class SlidingWindowCNN(nn.Module):
         # Fully connected layer: 64 -> 32 -> 16 input features (after two 2x2 poolings), 2 output features (num_classes)
         self.fc1 = nn.Linear(16 * 16 * 16, num_classes)
 
+    # Transform the ploygon box
+    def polygon_to_bbox(coords):
+        xs = coords[::2]
+        ys = coords[1::2]
+        return min(xs), min(ys), max(xs), max(ys)
+
     def forward(self, x):
         """
         Define the forward pass of the neural network.
