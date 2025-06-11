@@ -4,9 +4,9 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-ultralytics = "*"
 python-multipart = "*"
 fastapi = {extras = ["standard"], version = "*"}
+"ultralytics " = {git = "https://github.com/ultralytics/ultralytics.git"}
 
 [dev-packages]
 

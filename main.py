@@ -1,10 +1,11 @@
 from project_name.models.yoloModel import YOLOModel
 
-TRAIN = True
+TRAIN = False
 PREDICT = False
-PRINT = False
+VALIDATE = False
+TUNE = True
 # Subset for testing purposes
-subsetPath = "project_name/data/data.yaml"
+dataPath = "project_name/data/data.yaml"
 # We grab one of the images from test set
 testPath = (
     "project_name/data/test/images"
@@ -20,7 +21,7 @@ model = YOLOModel()
 if TRAIN is True:
     # Train the model on the subset of data
     print("Training the model on the subset of data...")
-    model.train(pathToData=subsetPath, epochs=50)
+    model.train(pathToData=dataPath, epochs=50)
 
 if PREDICT is True:
     print("Predicting on an example image...")
@@ -35,3 +36,21 @@ if PREDICT is True:
     )
     for r in results:
         r.show()  # Show the results in a window
+
+if VALIDATE is True:
+    print("Validating the model on the test set...")
+
+    # Load the trained model
+    model.load_model("runs/obb/train6/weights/best.pt")
+    results = model.val(data=dataPath, plots=True)
+    print(results.confusion_matrix.to_df())
+
+if TUNE is True:
+    print("Tuning the model on the test set...")
+
+    # Load the trained model
+    model.load_model("runs/obb/train6/weights/best.pt")
+    results = model.tune(
+        data=dataPath,
+        epochs=50,
+    )
