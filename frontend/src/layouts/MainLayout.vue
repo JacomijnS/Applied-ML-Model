@@ -5,7 +5,7 @@
       <q-toolbar>
         <q-btn dense flat round icon="menu" @click="toggleLeftDrawer" />
         <q-toolbar-title style="margin: 10px;">
-            <img src="../../public/icons/rugr_logoen_wit_rgb.png" style="width: 10vw;">
+            <img src="/src/assets/rugr_logoen_wit_rgb.png" style="width: 10vw;">
         </q-toolbar-title>
       </q-toolbar>
     </q-header>
@@ -42,7 +42,7 @@ const linksList = [
     title: 'Docs',
     caption: 'quasar.dev',
     icon: 'school',
-    link: 'https://quasar.dev'
+    link: '/model'
   },
   {
     title: 'Github',
