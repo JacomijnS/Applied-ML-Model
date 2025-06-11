@@ -48,4 +48,4 @@ class YOLOModel(YOLO):
         """
         Perform inference on an image and return the results.
         """
-        return super().__call__(**kwargs)
+        return super().predict(**kwargs)
