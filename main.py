@@ -1,7 +1,7 @@
 from project_name.models.yoloModel import YOLOModel
 import yaml
 
-TRAIN = False
+TRAIN = True
 PREDICT = False
 VALIDATE = False
 TUNE = True
@@ -23,7 +23,7 @@ model = YOLOModel()
 if TRAIN is True:
     # Train the model on the subset of data
     print("Training the model on the subset of data...")
-    model.train(pathToData=dataPath, epochs=50)
+    model.train(pathToData=dataPath, epochs=60)
 
 if PREDICT is True:
     print("Predicting on an example image...")

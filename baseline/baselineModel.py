@@ -37,12 +37,6 @@ class SlidingWindowCNN(nn.Module):
         # Fully connected layer: 64 -> 32 -> 16 input features (after two 2x2 poolings), 2 output features (num_classes)
         self.fc1 = nn.Linear(16 * 16 * 16, num_classes)
 
-    # Transform the ploygon box
-    def polygon_to_bbox(coords):
-        xs = coords[::2]
-        ys = coords[1::2]
-        return min(xs), min(ys), max(xs), max(ys)
-
     def forward(self, x):
         """
         Define the forward pass of the neural network.
@@ -101,10 +95,19 @@ def generate_patches(img, window_size=64, stride=32):
 
 
 class PatchDataset():
+    
+
     def __init__(self, image_directory, label_directory, window_size=64, stride=32): # Window is 64x64
+        
+        # Transform the ploygon to box
+        def polygon_to_bbox(coords):
+            xs = coords[::2]
+            ys = coords[1::2]
+            return min(xs), min(ys), max(xs), max(ys)
+        
         self.image_paths = [
-            os.path.join(image_directory, f) for f in os.listdir(image_directory).endswith('.jpg')
-            ] # Sanity check for images
+            os.path.join(image_directory, f) for f in os.listdir(image_directory) if f.endswith('.jpg')
+        ]
         self.window_size = window_size
         self.stride = stride
         self.samples = []
@@ -117,18 +120,22 @@ class PatchDataset():
             img = cv2.imread(path, cv2.IMREAD_GRAYSCALE).astype("float32") / 255.0
             patches, coords = generate_patches(img, window_size, stride)
             
-            boxes = [] # Save boxes at quadruple
+            boxes = [] # Save boxes
             if os.path.exists(label_path):
                 with open(label_path, 'r') as f:
-                    data = list(map(float, f.read().split()[1:0])) # Skip first class since we are not classifying
-                    for i in range(0, len(data), 4):
-                        cx, cy, w, h = data[i:i + 4]
-                        x1 = int((cx - w / 2) * img.shape[1])
-                        y1 = int((cy - h / 2) * img.shape[0])
-                        x2 = int((cx + w / 2) * img.shape[1])
-                        y2 = int((cy + h / 2) * img.shape[0])
-                        boxes.append((x1, y1, x2, y2))
-
+                    for line in f:
+                        parts = line.strip().split()
+                        if len(parts) < 3:
+                            continue
+                        # ignore class ts
+                        poly = list(map(float, parts[1:]))
+                        # group to x,y pairs, denormalize to pixel coords
+                        xs = poly[::2]
+                        ys = poly[1::2]
+                        xs = [int(x * img.shape[1]) for x in xs]
+                        ys = [int(y * img.shape[0]) for y in ys]
+                        bbox = polygon_to_bbox([*xs, *ys])
+                        boxes.append(bbox)
 
             for p in range(0, len(patches) - 1):
                 label = 0
