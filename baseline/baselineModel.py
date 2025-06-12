@@ -3,7 +3,6 @@
 
 import torch
 import torch.nn.functional as F
-import torchvision.datasets as datasets
 from torch import optim
 from torch import nn
 from torch.utils.data import DataLoader
@@ -62,8 +61,10 @@ class SlidingWindowCNN(nn.Module):
 # https://www.v7labs.com/blog/intersection-over-union-guide
 def compute_iou(box1, box2):
     # Calculate intersection area
-    intersection_width = min(box1.right, box2.right) - max(box1.left, box2.left)
-    intersection_height = min(box1.bottom, box2.bottom) - max(box1.top, box2.top)
+    l1, t1, r1, b1 = box1
+    l2, t2, r2, b2 = box2
+    intersection_width = min(r1, r2) - max(l1, l2)
+    intersection_height = min(b1, b2) - max(t1, t2)
     
     if intersection_width <= 0 or intersection_height <= 0:
         return 0
@@ -71,8 +72,8 @@ def compute_iou(box1, box2):
     intersection_area = intersection_width * intersection_height
 
     # Calculate union area
-    box1_area = (box1.right - box1.left) * (box1.bottom - box1.top)
-    box2_area = (box2.right - box2.left) * (box2.bottom - box2.top)
+    box1_area = (r1 - l1) * (b1 - t1)
+    box2_area = (r2 - l2) * (b2 - t2)
     
     union_area = box1_area + box2_area - intersection_area
 
@@ -137,7 +138,7 @@ class PatchDataset():
                         bbox = polygon_to_bbox([*xs, *ys])
                         boxes.append(bbox)
 
-            for p in range(0, len(patches) - 1):
+            for p in range(len(patches)):
                 label = 0
                 for box in boxes:
                     if compute_iou(box, coords[p]) > 0.2: # if more than half is 
@@ -150,9 +151,9 @@ class PatchDataset():
         return len(self.samples)
 
     def __getitem__(self, idx):
-        patch = self.samples[idx]
+        patch, label = self.samples[idx]
         patch = np.expand_dims(patch, axis=0)  # add channel
-        return torch.tensor(patch, dtype=torch.long), 0  # Still need to add labels
+        return torch.tensor(patch, dtype=torch.float32), torch.tensor(label, dtype=torch.long)
 
 # TRaining process
 def train_model():
@@ -163,7 +164,8 @@ def train_model():
     batch_size = 64
     learning_rate = 0.001
 
-    train_dataset = datasets.PatchDataset("data/train/images", window_size=64, stride=32)
+    train_dataset = PatchDataset("data/train/images", "data/train/labels", window_size=64, stride=32)
+
     train_loader = DataLoader(dataset=train_dataset, batch_size=batch_size, shuffle=True)
 
     criterion = nn.CrossEntropyLoss()
@@ -189,3 +191,10 @@ def train_model():
 
             # Optimization step: update the model parameters
             optimizer.step()
+    
+    torch.save(model.state_dict(), "sliding_window_cnn.pt")
+    print("Model saved to sliding_window_cnn.pt")
+
+
+if __name__ == "__main__":
+    train_model()
