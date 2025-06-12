@@ -55,6 +55,7 @@ if TUNE is True:
     results = model.tune(
         data=dataPath,
         epochs=50,
+        batch= 8,
     )
 
 if FINALTRAIN is True:
@@ -64,6 +65,6 @@ if FINALTRAIN is True:
     with open("runs/detect/tune/best_hyperparameters.yaml", "r") as f:
         best_hyp = yaml.safe_load(f)
 
-    model.train(data="path/to/data.yaml", epochs=100,**best_hyp)
+    model.train(data="path/to/data.yaml", epochs=100, **best_hyp)
 
     print("Final training completed.")

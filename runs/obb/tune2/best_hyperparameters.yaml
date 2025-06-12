@@ -1,0 +1,31 @@
+# 10/10 iterations complete ✅ (43436.57s)
+# Results saved to runs/obb/tune2
+# Best fitness=0.21406 observed at iteration 10
+# Best fitness metrics are {'metrics/precision(B)': 0.45336, 'metrics/recall(B)': 0.34636, 'metrics/mAP50(B)': 0.36779, 'metrics/mAP50-95(B)': 0.19698, 'val/box_loss': 1.23012, 'val/cls_loss': 3.69164, 'val/dfl_loss': 3.09776, 'fitness': 0.21406}
+# Best fitness model is runs/obb/train19
+# Best fitness hyperparameters are printed below.
+
+lr0: 0.00573
+lrf: 0.00772
+momentum: 0.94292
+weight_decay: 0.00064
+warmup_epochs: 4.10322
+warmup_momentum: 0.95
+box: 4.39837
+cls: 0.51048
+dfl: 1.46347
+hsv_h: 0.01211
+hsv_s: 0.7253
+hsv_v: 0.33682
+degrees: 0.0
+translate: 0.07398
+scale: 0.6857
+shear: 0.0
+perspective: 0.0
+flipud: 0.0
+fliplr: 0.54352
+bgr: 0.0
+mosaic: 1.0
+mixup: 0.0
+cutmix: 0.0
+copy_paste: 0.0
