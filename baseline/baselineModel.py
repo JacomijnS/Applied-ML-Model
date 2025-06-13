@@ -10,6 +10,16 @@ from tqdm import tqdm
 import os
 import cv2
 import numpy as np
+from torchvision import transforms
+
+
+patch_augmentation = transforms.Compose([
+    transforms.ToPILImage(),
+    transforms.RandomHorizontalFlip(),
+    transforms.RandomVerticalFlip(),
+    transforms.ColorJitter(brightness=0.2, contrast=0.2),
+    transforms.ToTensor(),
+])
 
 
 class SlidingWindowCNN(nn.Module):
@@ -34,7 +44,7 @@ class SlidingWindowCNN(nn.Module):
         # Second convolutional layer: 8 input channels, 16 output channels, 3x3 kernel, stride 1, padding 1
         self.conv2 = nn.Conv2d(in_channels=8, out_channels=16, kernel_size=3, stride=1, padding=1)
         # Fully connected layer: 64 -> 32 -> 16 input features (after two 2x2 poolings), 2 output features (num_classes)
-        self.fc1 = nn.Linear(16 * 16 * 16, num_classes)
+        self.fc1 = nn.Linear(16 * 8 * 8, num_classes)
 
     def forward(self, x):
         """
@@ -98,7 +108,7 @@ def generate_patches(img, window_size=64, stride=32):
 class PatchDataset():
     
 
-    def __init__(self, image_directory, label_directory, window_size=64, stride=32): # Window is 64x64
+    def __init__(self, image_directory, label_directory, window_size=64, stride=32, negative_to_positive_ratio=1.05): # Window is 64x64
         
         # Transform the ploygon to box
         def polygon_to_bbox(coords):
@@ -112,6 +122,10 @@ class PatchDataset():
         self.window_size = window_size
         self.stride = stride
         self.samples = []
+
+
+        positive_count = 0
+        negative_count = 0
 
         for path in self.image_paths:
             # Get filename and get the correct label
@@ -128,7 +142,7 @@ class PatchDataset():
                         parts = line.strip().split()
                         if len(parts) < 3:
                             continue
-                        # ignore class ts
+                        # ignore class 
                         poly = list(map(float, parts[1:]))
                         # group to x,y pairs, denormalize to pixel coords
                         xs = poly[::2]
@@ -139,12 +153,25 @@ class PatchDataset():
                         boxes.append(bbox)
 
             for p in range(len(patches)):
+                patch = patches[p]
+                if np.mean(patch) < 1e-3: 
+                    continue
+
                 label = 0
                 for box in boxes:
-                    if compute_iou(box, coords[p]) > 0.2: # if more than half is 
+                    if compute_iou(box, coords[p]) > 0.5:
                         label = 1
                         break
-                self.samples.append((patches[p], label)) # store patch with label as a double
+
+                # make sure it is somewhat the same ratio
+                if label == 1:
+                    self.samples.append((patch, label))
+                    positive_count += 1
+                elif negative_count < negative_to_positive_ratio * (positive_count + 1):
+                    self.samples.append((patch, label))
+                    negative_count += 1
+
+        print(f"Loaded {len(self.samples)} patches: {positive_count} positive, {negative_count} negative.")
 
 
     def __len__(self):
@@ -152,19 +179,34 @@ class PatchDataset():
 
     def __getitem__(self, idx):
         patch, label = self.samples[idx]
-        patch = np.expand_dims(patch, axis=0)  # add channel
-        return torch.tensor(patch, dtype=torch.float32), torch.tensor(label, dtype=torch.long)
+        patch = np.expand_dims(patch, axis=0)  # shape: (1, H, W)
+
+        # Convert to uint8 for PIL if using ToPILImage()
+        patch_for_aug = (patch * 255).astype(np.uint8)
+
+        # Apply augmentation ONLY for positives (label==1)
+        if label == 1:
+            # patch_for_aug shape: (1, H, W) -> (H, W) for ToPILImage
+            aug_patch = patch_augmentation(patch_for_aug[0])
+            # aug_patch shape: (1, H, W)
+            return aug_patch, torch.tensor(label, dtype=torch.long)
+        else:
+            # For negatives, just convert to tensor (no augmentation)
+            return torch.tensor(patch, dtype=torch.float32), torch.tensor(label, dtype=torch.long)
 
 # TRaining process
 def train_model():
+    if torch.cuda.is_available():
+        print("Training on GPU")
+
     device = "cuda" if torch.cuda.is_available() else "cpu"
     model = SlidingWindowCNN().to(device)
 
-    num_epochs = 10  # Reduced for demonstration purposes
-    batch_size = 64
+    num_epochs = 50  # Reduced for demonstration purposes
+    batch_size = 16
     learning_rate = 0.001
 
-    train_dataset = PatchDataset("data/train/images", "data/train/labels", window_size=64, stride=32)
+    train_dataset = PatchDataset("data/train/images", "data/train/labels", window_size=32, stride=8)
 
     train_loader = DataLoader(dataset=train_dataset, batch_size=batch_size, shuffle=True)
 

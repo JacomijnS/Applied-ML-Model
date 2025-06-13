@@ -18,9 +18,9 @@ def transform_label(norm_x, norm_y, orig_w, orig_h, target_size=512):
     return x_resized, y_resized
 
 
-input_label_dir = "../project_name/data/train/labels"
-input_image_dir = "../project_name/data/train/images"
-output_label_dir = "data/train/labels"
+input_label_dir = "../project_name/data/test/labels"
+input_image_dir = "../project_name/data/test/images"
+output_label_dir = "data/test/labels"
 
 # take text and put it into the data repo for this data
 for filename in os.listdir(input_label_dir):
@@ -53,10 +53,10 @@ for filename in os.listdir(input_label_dir):
             for i in range(0, len(norm_coords), 2):
                 x, y = norm_coords[i], norm_coords[i + 1]
                 x_new, y_new = transform_label(x, y, orig_w, orig_h)
-                # Save as normalized coordinates in the new 512x512 image
+                # save as normalized coordinates 
                 x_new_norm = x_new / 512
                 y_new_norm = y_new / 512
                 transformed_coords.extend([x_new_norm, y_new_norm])
 
-            # Write to file in the same format
+            # write to file 
             outfile.write(f"{class_id} " + " ".join(f"{v:.8f}" for v in transformed_coords) + "\n")

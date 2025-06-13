@@ -25,8 +25,8 @@ def resize_img(img, target_size = 512):
     return padded_img.astype("float32")
 
 
-input_dir = "../project_name/data/train/images"
-output_dir = "data/train/images"
+input_dir = "../project_name/data/test/images"
+output_dir = "data/test/images"
 
 
 # take image and put it into the data repo for this data
